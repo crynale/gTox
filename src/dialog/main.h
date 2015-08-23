@@ -23,6 +23,7 @@
 #include <gtkmm.h>
 #include "utils/builder.h"
 #include "utils/storage.h"
+#include "utils/debug.h"
 #include "tox/types.h"
 #include "widget/main_menu.h"
 #include "config.h"
@@ -30,7 +31,7 @@
 
 namespace dialog {
     // contact list with pinned chat
-    class main : public Gtk::Window {
+    class main : public Gtk::Window, public utils::debug<main> {
         private:
             std::shared_ptr<toxmm::core> m_toxcore;
 

@@ -23,9 +23,10 @@
 #include "label.h"
 
 #include "utils/dispatcher.h"
+#include "utils/debug.h"
 
 namespace widget {
-    class chat_message : public Gtk::Revealer {
+    class chat_message : public Gtk::Revealer, public utils::debug<chat_message> {
         private:
             class label: public widget::label {
                 private:

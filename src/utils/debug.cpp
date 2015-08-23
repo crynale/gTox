@@ -2,7 +2,6 @@
     gTox a GTK-based tox-client - https://github.com/KoKuToru/gTox.git
 
     Copyright (C) 2015  Luca Béla Palkovics
-    Copyright (C) 2014  Maurice Mohlek
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,20 +16,20 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 **/
-#ifndef DIALOGERROR_H
-#define DIALOGERROR_H
+#include "debug.h"
 
-#include <gtkmm.h>
-#include "utils/debug.h"
+std::map<std::type_index, utils::debug_helper_struct> utils::debug_helper_counter __attribute__ ((init_priority (2000)));
 
-namespace dialog {
-    class error : public Gtk::MessageDialog, public utils::debug<error>  {
-        public:
-            error(Gtk::Window& parent, bool fatal, std::string title, std::string message);
-            error(bool fatal, std::string title, std::string message);
-            ~error();
-
-            int run();
-    };
+void display() {
+    bool okay = true;
+    for (auto it: utils::debug_helper_counter) {
+        auto& item = it.second;
+        if (item.count != 0) {
+            okay = false;
+            std::clog << item.name << " " << item.count << " active objects !" << std::endl;
+        }
+    }
+    if (!okay) {
+        std::cerr << "Didn't clean exit !" << std::endl;
+    }
 }
-#endif
