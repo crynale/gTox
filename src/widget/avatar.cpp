@@ -31,6 +31,7 @@ avatar::image::image(toxmm::contactAddrPublic addr):
     Glib::ObjectBase(typeid(avatar::image)),
     m_property_pixbuf(*this,
                       "image-pixbuf") {
+    utils::log me;
 
     auto path = Glib::build_filename(
                     Glib::get_user_config_dir(),
@@ -42,6 +43,7 @@ avatar::image::image(toxmm::contactAddrPublic addr):
     m_monitor->signal_changed().connect(sigc::track_obj([this](const Glib::RefPtr<Gio::File>&,
                                         const Glib::RefPtr<Gio::File>&,
                                         Gio::FileMonitorEvent event_type) {
+        utils::log me;
         switch (event_type) {
             case Gio::FILE_MONITOR_EVENT_CREATED:
             case Gio::FILE_MONITOR_EVENT_CHANGES_DONE_HINT:
@@ -58,6 +60,7 @@ avatar::image::image(toxmm::contactAddrPublic addr):
 }
 
 void avatar::image::load() {
+    utils::log me;
     property_pixbuf() =
             Gdk::Pixbuf::create_from_resource("/org/gtox/icon/avatar.svg");
     if (!m_file->query_exists()) {
@@ -68,7 +71,8 @@ void avatar::image::load() {
     auto file = m_file;
     auto version = ++m_version;
     auto self = this;
-    Glib::Thread::create([dispatcher, file, self, version](){
+    Glib::Thread::create([dispatcher, file, self, version]() {
+        utils::log me;
         static std::mutex mutex;
         std::lock_guard<std::mutex> lg(mutex); //limit parallel load
 
@@ -99,6 +103,7 @@ void avatar::image::load() {
         pix = Gdk::Pixbuf::create_subpixbuf(pix, src_x, src_y, 128, 128);
 
         dispatcher.emit([pix, self, version]() {
+            utils::log me;
             if (version == self->m_version) {
                 self->property_pixbuf() = pix;
             }
@@ -110,6 +115,7 @@ avatar::avatar(BaseObjectType* cobject,
                utils::builder,
                toxmm::contactAddrPublic addr)
     : Gtk::Image(cobject) {
+    utils::log me;
     //load image
     static std::map<toxmm::contactAddrPublic, std::shared_ptr<image>> m_image;
     auto iter = m_image.find(addr);
@@ -129,6 +135,7 @@ avatar::avatar(BaseObjectType* cobject,
 }
 
 avatar::~avatar() {
+    utils::log me;
 }
 
 bool avatar::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
@@ -218,6 +225,7 @@ void avatar::get_preferred_height_vfunc(int& minimum_height,
 }
 
 void avatar::save_for(toxmm::contactAddrPublic addr) {
+    utils::log me;
     auto path = Glib::build_filename(
                     Glib::get_user_config_dir(),
                     "tox", "avatars",

@@ -73,5 +73,14 @@ namespace utils {
                 return std::clog << "  " << (void*)this << " ";
             }
     };
+
+    /**
+     * @brief The log class, prints a log message on creation and destruction
+     */
+    class log {
+        public:
+            log();
+            ~log();
+    };
 }
 #endif

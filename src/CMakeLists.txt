@@ -28,8 +28,22 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -g3 -Wno-deprecated")
 find_package(PkgConfig)
 pkg_check_modules(GTKMM REQUIRED gtkmm-3.0>=3.16)
 pkg_check_modules(GSTREAMERMM REQUIRED gstreamermm-1.0)
+
+FIND_PATH(LIBUNWIND_INCLUDE_DIR libunwind.h)
+if(NOT LIBUNWIND_INCLUDE_DIR)
+  message(FATAL_ERROR "failed to find libunwind.h")
+elif(NOT EXISTS "${LIBUNWIND_INCLUDE_DIR}/unwind.h")
+  message(FATAL_ERROR "libunwind.h was found, but unwind.h was not found in that directory.")
+  SET(LIBUNWIND_INCLUDE_DIR "")
+endif()
+
+FIND_LIBRARY(LIBUNWIND_LIBRARY "unwind")
+if (NOT LIBUNWIND_LIBRARY)
+    MESSAGE(FATAL_ERROR "failed to find unwind library")
+endif ()
+
 link_directories(${GTKMM_LIBRARY_DIRS} ${GSTREAMERMM_LIBRARY_DIRS})
-include_directories(${GTKMM_INCLUDE_DIRS} ${GSTREAMERMM_INCLUDE_DIRS})
+include_directories(${GTKMM_INCLUDE_DIRS} ${GSTREAMERMM_INCLUDE_DIRS} ${LIBUNWIND_INCLUDE_DIR})
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
@@ -83,9 +97,9 @@ add_executable(${PROJECT_NAME}
 )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 if(WIN32)
-    target_link_libraries(${PROJECT_NAME} ${GTKMM_LIBRARIES} ${GSTREAMERMM_LIBRARIES} ${TOX_LIBRARY} -lpthread -lrpcrt4 toxmm)
+    target_link_libraries(${PROJECT_NAME} ${GTKMM_LIBRARIES} ${GSTREAMERMM_LIBRARIES} ${LIBUNWIND_LIBRARY} ${TOX_LIBRARY} -lpthread -lrpcrt4 toxmm)
 else()
-    target_link_libraries(${PROJECT_NAME} ${GTKMM_LIBRARIES} ${GSTREAMERMM_LIBRARIES} ${TOX_LIBRARY} -lpthread -luuid toxmm)
+    target_link_libraries(${PROJECT_NAME} ${GTKMM_LIBRARIES} ${GSTREAMERMM_LIBRARIES} ${LIBUNWIND_LIBRARY} ${TOX_LIBRARY} -lpthread -luuid toxmm)
 endif()
 
 add_dependencies(${PROJECT_NAME}

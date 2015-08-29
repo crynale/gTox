@@ -25,6 +25,7 @@ namespace sigc {
 using namespace widget;
 
 chat_input::chat_input(BaseObjectType* cobject, utils::builder): Gtk::TextView(cobject) {
+    utils::log me;
     m_buffer = get_buffer();
 
     m_bold_tag = m_buffer->create_tag("bold");
@@ -88,6 +89,7 @@ chat_input::chat_input(BaseObjectType* cobject, utils::builder): Gtk::TextView(c
 }
 
 Glib::ustring chat_input::get_serialized_text() {
+    utils::log me;
     Glib::ustring text;
     auto begin = m_buffer->begin();
     auto end = m_buffer->end();

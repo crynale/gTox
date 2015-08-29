@@ -29,6 +29,7 @@ label::label(const Glib::ustring& text)
       m_clip(nullptr),
       selection_index_from(0),
       selection_index_to(0) {
+    utils::log me;
     // add default name because
     // styling with "gtkmm_CustomObject_WidgetChatMessage" is not nice
 
@@ -47,6 +48,7 @@ label::label(const Glib::ustring& text)
 }
 
 label::~label() {
+    utils::log me;
 }
 
 bool label::is_shape(PangoLayoutRun* run) {
@@ -128,6 +130,7 @@ bool label::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 }
 
 void label::set_text(const Glib::ustring& text) {
+    utils::log me;
     m_text = create_pango_layout("");
     m_text->set_wrap(Pango::WRAP_WORD_CHAR);
 
@@ -288,6 +291,7 @@ void label::get_preferred_height_vfunc(int& minimum_height,
 }
 
 Glib::ustring label::get_text() {
+    utils::log me;
     return m_text->get_text();
 }
 
@@ -354,6 +358,7 @@ void label::on_selection(int from_x, int from_y, int to_x, int to_y) {
 }
 
 Glib::ustring label::get_selection() {
+    utils::log me;
     if (!m_clip) {
         return Glib::ustring();
     }

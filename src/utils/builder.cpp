@@ -18,19 +18,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 **/
 #include "builder.h"
-
 using namespace utils;
 
 builder::builder(const Glib::RefPtr<Gtk::Builder> builder):
     m_builder(builder) {
+    utils::log me;
+}
+
+builder::~builder() {
+    utils::log me;
 }
 
 Glib::RefPtr<Gtk::Builder> builder::operator->() {
+    utils::log me;
     return m_builder;
 }
 
 GtkWidget* builder::get_cwidget(const Glib::ustring& name)
 {
+  utils::log me;
   GObject *cobject = gtk_builder_get_object (m_builder->gobj(), name.c_str());
   if(!cobject) {
       throw std::runtime_error(std::string() + "gToxBuilder - widget \"" + name + "\"not found");

@@ -41,7 +41,7 @@ gTox::gTox()
       m_config_path(Glib::build_filename(Glib::get_user_config_dir(), "tox")),
       m_avatar_path(Glib::build_filename(m_config_path, "avatars")),
       m_config_global_path(Glib::build_filename(Glib::get_user_config_dir(), "gtox")) {
-
+    utils::log me;
     Glib::set_application_name(_("gTox"));
 
     if (!Glib::file_test(m_config_path, Glib::FILE_TEST_IS_DIR)) {
@@ -79,6 +79,7 @@ gTox::gTox()
                 GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
     auto update_style = [css]() {
+        utils::log me;
         bool dark = Gtk::Settings::get_default()
                     ->property_gtk_application_prefer_dark_theme();
         css->load_from_resource(dark?"/org/gtox/style/dark.css":"/org/gtox/style/light.css");
@@ -91,6 +92,7 @@ gTox::gTox()
 }
 
 Glib::RefPtr<gTox> gTox::create() {
+    utils::log me;
     if (!m_instance) {
         m_instance = Glib::RefPtr<gTox>( new gTox() );
     }
@@ -102,7 +104,7 @@ Glib::RefPtr<gTox> gTox::instance() {
 }
 
 void gTox::on_activate() {
-
+    utils::log me;
     Glib::Dir dir(m_config_path);
     std::vector<std::string> accounts(dir.begin(), dir.end());
     accounts.resize(std::distance(
@@ -146,6 +148,7 @@ void gTox::on_activate() {
     auto profile_ptr = profile.raw();
     if (profile->get_path().empty()) {
         profile->signal_hide().connect_notify([this, profile_ptr](){
+            utils::log me;
             if (!profile_ptr->get_path().empty()) {
                 open(Gio::File::create_for_path(profile_ptr->get_path()));
             } else if (!profile_ptr->is_aborted()) {
@@ -159,6 +162,7 @@ void gTox::on_activate() {
 
                 auto assistant_ptr = assistant.raw();
                 assistant->signal_hide().connect_notify([this, assistant_ptr]() {
+                    utils::log me;
                     Glib::ustring path = assistant_ptr->get_path();
                     remove_window(*assistant_ptr);
 
@@ -183,6 +187,7 @@ void gTox::on_activate() {
 
 void gTox::on_open(const Gio::Application::type_vec_files& files,
                    const Glib::ustring& hint) {
+    utils::log me;
     //open file !
     for (auto file : files) {
         mark_busy();
@@ -197,6 +202,7 @@ void gTox::on_open(const Gio::Application::type_vec_files& files,
 }
 
 int gTox::on_command_line(const Glib::RefPtr<Gio::ApplicationCommandLine>& command_line) {
+    utils::log me;
     int argc = 0;
     auto argv = command_line ? command_line->get_arguments(argc) : nullptr;
     std::vector<std::string> arguments;

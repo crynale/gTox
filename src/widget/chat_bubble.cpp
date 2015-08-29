@@ -29,6 +29,7 @@ namespace sigc {
 using namespace widget;
 
 void chat_bubble::init(utils::builder builder) {
+    utils::log me;
     builder.get_widget("row_box", m_row_box);
     builder.get_widget("username", m_username);
     builder.get_widget("frame", m_frame);
@@ -54,6 +55,7 @@ chat_bubble::chat_bubble(BaseObjectType* cobject,
                          Glib::PropertyProxy_ReadOnly<Glib::ustring> username,
                          Glib::PropertyProxy_ReadOnly<toxmm::contactAddrPublic> addr,
                          Glib::DateTime time): Gtk::Revealer(cobject) {
+    utils::log me;
     m_avatar = builder
                .get_widget_derived<avatar>("avatar",
                                            addr);
@@ -113,10 +115,11 @@ chat_bubble::chat_bubble(BaseObjectType* cobject,
 }
 
 chat_bubble::~chat_bubble() {
-    //
+    utils::log me;
 }
 
 utils::builder::ref<chat_bubble> chat_bubble::create(std::shared_ptr<toxmm::core> core, Glib::DateTime time) {
+    utils::log me;
     return utils::builder::create_ref<chat_bubble>(
                 "/org/gtox/ui/chat_bubble_right.ui",
                 "chat_bubble",
@@ -126,6 +129,7 @@ utils::builder::ref<chat_bubble> chat_bubble::create(std::shared_ptr<toxmm::core
 }
 
 utils::builder::ref<chat_bubble> chat_bubble::create(std::shared_ptr<toxmm::contact> contact, Glib::DateTime time) {
+    utils::log me;
     return utils::builder::create_ref<chat_bubble>(
                 "/org/gtox/ui/chat_bubble_left.ui",
                 "chat_bubble",
@@ -135,5 +139,6 @@ utils::builder::ref<chat_bubble> chat_bubble::create(std::shared_ptr<toxmm::cont
 }
 
 void chat_bubble::add_row(Gtk::Widget& widget) {
+    utils::log me;
     m_row_box->add(widget);
 }

@@ -27,6 +27,7 @@
 using namespace widget;
 
 utils::builder::ref<contact> contact::create(dialog::main& main, std::shared_ptr<toxmm::contact> contact, bool for_notify) {
+    utils::log me;
     return utils::builder::create_ref<widget::contact>(
                 "/org/gtox/ui/list_item_contact.ui",
                 "contact_list_item",
@@ -45,7 +46,7 @@ contact::contact(BaseObjectType* cobject,
       m_main(main),
       m_contact(contact),
       m_for_active_chats(for_active_chats) {
-
+    utils::log me;
     builder.get_widget("contact_list_grid_mini", m_contact_list_grid_mini);
     builder.get_widget("contact_list_grid", m_contact_list_grid);
     builder.get_widget("revealer", m_revealer);
@@ -100,6 +101,7 @@ contact::contact(BaseObjectType* cobject,
     m_status_icon->set_from_icon_name("status_offline", Gtk::BuiltinIconSize::ICON_SIZE_BUTTON);
 
     m_contact->property_status().signal_changed().connect(sigc::track_obj([this]() {
+        utils::log me;
         switch (m_contact->property_status().get_value()) {
             case TOX_USER_STATUS_AWAY:
                 m_status_icon->set_from_icon_name("status_away", Gtk::BuiltinIconSize::ICON_SIZE_BUTTON);
@@ -116,6 +118,7 @@ contact::contact(BaseObjectType* cobject,
     }, *this));
 
     m_contact->property_connection().signal_changed().connect(sigc::track_obj([this]() {
+        utils::log me;
         if (m_contact->property_connection().get_value() == TOX_CONNECTION_NONE) {
             m_status_icon->set_from_icon_name("status_offline", Gtk::BuiltinIconSize::ICON_SIZE_BUTTON);
             m_status_icon->reset_style();
@@ -124,6 +127,7 @@ contact::contact(BaseObjectType* cobject,
     }, *this));
 
     auto display_spinner = [this]() {
+        utils::log me;
         m_spin->start();
     };
 
@@ -131,6 +135,7 @@ contact::contact(BaseObjectType* cobject,
     m_contact->signal_recv_action().connect(sigc::hide(sigc::track_obj(display_spinner, *this)));
 
     auto update_visibility = [this]() {
+        utils::log me;
         if (!m_for_active_chats &&
                 !m_main.config()->property_contacts_compact_list().get_value()) {
             m_contact_list_grid_mini->hide();
@@ -155,6 +160,7 @@ contact::contact(BaseObjectType* cobject,
     //callbacks for logging
     m_contact->signal_send_message().connect(sigc::track_obj([this](Glib::ustring message, std::shared_ptr<toxmm::receipt>) {
        dialog::chat::add_log(m_main.tox()->storage(), m_contact, [&](flatbuffers::FlatBufferBuilder& fbb) {
+           utils::log me;
            return flatbuffers::Log::CreateItem(fbb,
                                                fbb.CreateString(m_main.tox()->property_addr_public().get_value()),
                                                Glib::DateTime::create_now_utc().to_unix(),
@@ -167,6 +173,7 @@ contact::contact(BaseObjectType* cobject,
     }, *this));
     m_contact->signal_recv_message().connect(sigc::track_obj([this](Glib::ustring message) {
         dialog::chat::add_log(m_main.tox()->storage(), m_contact, [&](flatbuffers::FlatBufferBuilder& fbb) {
+            utils::log me;
             return flatbuffers::Log::CreateItem(fbb,
                                                 fbb.CreateString(m_contact->property_addr_public().get_value()),
                                                 Glib::DateTime::create_now_utc().to_unix(),
@@ -178,6 +185,7 @@ contact::contact(BaseObjectType* cobject,
         });
     }, *this));
     m_contact->signal_send_action().connect(sigc::track_obj([this](Glib::ustring action, std::shared_ptr<toxmm::receipt>) {
+        utils::log me;
         dialog::chat::add_log(m_main.tox()->storage(), m_contact, [&](flatbuffers::FlatBufferBuilder& fbb) {
             return flatbuffers::Log::CreateItem(fbb,
                                                 fbb.CreateString(m_main.tox()->property_addr_public().get_value()),
@@ -190,6 +198,7 @@ contact::contact(BaseObjectType* cobject,
         });
     }, *this));
     m_contact->signal_recv_action().connect(sigc::track_obj([this](Glib::ustring action) {
+        utils::log me;
         dialog::chat::add_log(m_main.tox()->storage(), m_contact, [&](flatbuffers::FlatBufferBuilder& fbb) {
             return flatbuffers::Log::CreateItem(fbb,
                                                 fbb.CreateString(m_contact->property_addr_public().get_value()),
@@ -204,10 +213,12 @@ contact::contact(BaseObjectType* cobject,
     auto fm = m_contact->file_manager();
     if (fm) {
         fm->signal_send_file().connect(sigc::track_obj([this](std::shared_ptr<toxmm::file>& file) {
+            utils::log me;
             if (file->property_kind() != TOX_FILE_KIND_DATA) {
                 return;
             }
             dialog::chat::add_log(m_main.tox()->storage(), m_contact, [&](flatbuffers::FlatBufferBuilder& fbb) {
+                utils::log me;
                 return flatbuffers::Log::CreateItem(fbb,
                                                     fbb.CreateString(m_main.tox()->property_addr_public().get_value()),
                                                     Glib::DateTime::create_now_utc().to_unix(),
@@ -223,10 +234,12 @@ contact::contact(BaseObjectType* cobject,
             });
         }, *this));
         fm->signal_recv_file().connect(sigc::track_obj([this](std::shared_ptr<toxmm::file>& file) {
+            utils::log me;
             if (file->property_kind() != TOX_FILE_KIND_DATA) {
                 return;
             }
             dialog::chat::add_log(m_main.tox()->storage(), m_contact, [&](flatbuffers::FlatBufferBuilder& fbb) {
+                utils::log me;
                 return flatbuffers::Log::CreateItem(fbb,
                                                     fbb.CreateString(m_contact->property_addr_public().get_value()),
                                                     Glib::DateTime::create_now_utc().to_unix(),
@@ -245,6 +258,7 @@ contact::contact(BaseObjectType* cobject,
 }
 
 contact::~contact() {
+    utils::log me;
 }
 
 int contact::compare(contact* other) {
@@ -259,18 +273,22 @@ int contact::compare(contact* other) {
 }
 
 void contact::on_show() {
+    utils::log me;
     Gtk::Widget::on_show();
     m_dispatcher.emit([this](){
+        utils::log me;
         m_revealer->set_reveal_child(true);
     });
 }
 
 void contact::on_hide() {
+    utils::log me;
     if (m_revealer->get_reveal_child()) {
         m_revealer->set_reveal_child(false);
         utils::dispatcher::ref dispatcher = m_dispatcher;
         Glib::signal_timeout().connect_once([this, dispatcher]() {
             dispatcher.emit([this]() {
+                utils::log me;
                 if (!m_revealer->get_reveal_child()) {
                     Gtk::Widget::on_hide();
                 }
@@ -286,6 +304,7 @@ std::shared_ptr<toxmm::contact> contact::get_contact() {
 }
 
 void contact::activated() {
+    utils::log me;
     if (m_chat) {
         m_chat->activated();
     } else {

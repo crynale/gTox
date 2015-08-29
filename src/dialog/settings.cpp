@@ -32,7 +32,7 @@ namespace sigc {
 settings::settings(main& main)
     : m_builder(Gtk::Builder::create_from_resource("/org/gtox/ui/dialog_settings.ui")),
       m_main(main) {
-
+    utils::log me;
     m_builder.get_widget("headerbar_attached", m_headerbar_attached);
     m_builder.get_widget("headerbar_detached", m_headerbar_detached);
     m_builder.get_widget("body", m_body);
@@ -80,6 +80,7 @@ settings::settings(main& main)
     m_headerbar_detached->set_subtitle(_("Configure gTox"));
 
     m_btn_detach->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         m_main.property_gravity() = Gdk::GRAVITY_NORTH_WEST;
         int x, y;
         m_main.get_position(x, y);
@@ -90,14 +91,17 @@ settings::settings(main& main)
         show();
     }, *this));
     m_btn_attach->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         remove();
         hide();
         m_main.chat_add(*m_headerbar_attached, *m_body, *m_btn_prev, *m_btn_next);
     }, *this));
     m_btn_close_attached->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         m_main.chat_remove(*m_headerbar_attached, *m_body);
     }, *this));
     m_btn_close_detached->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         remove();
         hide();
     }, *this));
@@ -153,10 +157,12 @@ settings::settings(main& main)
 
     //FILETRANSFER-SETTINGS
     m_main.config()->property_file_save_path().signal_changed().connect(sigc::track_obj([this]() {
+        utils::log me;
         m_ft_save_to->set_file(Gio::File::create_for_path(m_main.config()->property_file_save_path().get_value()));
     }, *this));
     m_ft_save_to->set_file(Gio::File::create_for_path(m_main.config()->property_file_save_path().get_value()));
     m_ft_save_to->signal_file_set().connect(sigc::track_obj([this]() {
+        utils::log me;
         m_main.config()->property_file_save_path() = m_ft_save_to->get_file()->get_path();
     }, *this));
     m_bindings.push_back(Glib::Binding::bind_property(
@@ -258,6 +264,7 @@ settings::settings(main& main)
 }
 
 void settings::activated() {
+    utils::log me;
     if (is_visible()) {
         present();
     } else {
@@ -266,5 +273,6 @@ void settings::activated() {
 }
 
 settings::~settings() {
+    utils::log me;
     m_main.chat_remove(*m_headerbar_attached, *m_body);
 }

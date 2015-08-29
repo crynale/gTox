@@ -28,7 +28,7 @@ using namespace widget;
 videoplayer::videoplayer(BaseObjectType* cobject,
                          utils::builder builder):
     Gtk::Revealer(cobject) {
-
+    utils::log me;
     builder.get_widget("video_control", m_eventbox);
     builder.get_widget("video_revealer", m_video_revealer);
     builder.get_widget("video_control_box", m_control);
@@ -82,6 +82,7 @@ videoplayer::videoplayer(BaseObjectType* cobject,
 
     //Button handling
     auto property_state_update = [this]() {
+        utils::log me;
         auto state = m_streamer.property_state().get_value();
         bool playing = state == Gst::STATE_PLAYING;
         bool paused  = state == Gst::STATE_PAUSED;
@@ -116,16 +117,19 @@ videoplayer::videoplayer(BaseObjectType* cobject,
                              flags | Glib::BINDING_INVERT_BOOLEAN));
 
     m_play_btn->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         if (m_play_btn->property_active()) {
            m_streamer.property_state() = Gst::STATE_PLAYING;
         }
     }, *this));
     m_pause_btn->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         if (m_pause_btn->property_active()) {
             m_streamer.property_state() = Gst::STATE_PAUSED;
         }
     }, *this));
     m_stop_btn->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         if (m_stop_btn->property_active()) {
             m_streamer.property_state() = Gst::STATE_NULL;
             m_streamer.property_state() = Gst::STATE_PAUSED;
@@ -133,6 +137,7 @@ videoplayer::videoplayer(BaseObjectType* cobject,
     }, *this));
 
     m_streamer.property_uri().signal_changed().connect(sigc::track_obj([this]() {
+        utils::log me;
         m_streamer.property_state() = Gst::STATE_PAUSED;
     }, *this));
 
@@ -144,10 +149,11 @@ videoplayer::videoplayer(BaseObjectType* cobject,
 }
 
 videoplayer::~videoplayer() {
-
+    utils::log me;
 }
 
 utils::builder::ref<videoplayer> videoplayer::create() {
+    utils::log me;
     return utils::builder::create_ref<videoplayer>(
                 "/org/gtox/ui/videoplayer.ui",
                 "videoplayer");

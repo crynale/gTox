@@ -39,7 +39,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
     m_contact(contact),
     m_main(main),
     m_builder(Gtk::Builder::create_from_resource("/org/gtox/ui/dialog_chat.ui")) {
-
+    utils::log me;
     m_builder.get_widget("chat_headerbar_attached", m_headerbar_attached);
     m_builder.get_widget("chat_headerbar_detached", m_headerbar_detached);
     m_builder.get_widget("chat_body", m_body);
@@ -87,6 +87,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
 
     set_titlebar(*m_headerbar_detached);
     m_btn_detach->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         m_main.property_gravity() = Gdk::GRAVITY_NORTH_WEST;
         int x, y;
         m_main.get_position(x, y);
@@ -97,19 +98,23 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
         show();
     }, *this));
     m_btn_attach->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         remove();
         hide();
         m_main.chat_add(*m_headerbar_attached, *m_body, *m_btn_prev, *m_btn_next);
     }, *this));
     m_btn_close_attached->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         m_main.chat_remove(*m_headerbar_attached, *m_body);
     }, *this));
     m_btn_close_detached->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         remove();
         hide();
     }, *this));
 
     m_input->signal_key_press_event().connect(sigc::track_obj([this](GdkEventKey* event) {
+        utils::log me;
         auto text_buffer = m_input->get_buffer();
         if (event->keyval == GDK_KEY_Return && !(event->state & GDK_SHIFT_MASK)) {
             if (text_buffer->begin() != text_buffer->end()) {
@@ -129,6 +134,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
     }, *this), false);
 
     m_contact->signal_send_message().connect(sigc::track_obj([this](Glib::ustring message, std::shared_ptr<toxmm::receipt>) {
+        utils::log me;
         auto time = Glib::DateTime::create_now_utc();
         add_chat_line(
             LINE_APPEND_APPENDABLE,
@@ -140,6 +146,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
     }, *this));
 
     m_contact->signal_recv_message().connect(sigc::track_obj([this](Glib::ustring message) {
+        utils::log me;
         auto time = Glib::DateTime::create_now_utc();
         add_chat_line(
             LINE_APPEND_APPENDABLE,
@@ -151,6 +158,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
     }, *this));
 
     m_contact->signal_send_action().connect(sigc::track_obj([this](Glib::ustring action, std::shared_ptr<toxmm::receipt>) {
+        utils::log me;
         auto time = Glib::DateTime::create_now_utc();
         add_chat_line(
             LINE_NEW,
@@ -162,6 +170,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
     }, *this));
 
     m_contact->signal_recv_action().connect(sigc::track_obj([this](Glib::ustring action) {
+        utils::log me;
         auto time = Glib::DateTime::create_now_utc();
         add_chat_line(
             LINE_NEW,
@@ -173,6 +182,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
     }, *this));
 
     m_contact->file_manager()->signal_recv_file().connect(sigc::track_obj([this](std::shared_ptr<toxmm::file>& file) {
+        utils::log me;
         if (file->property_kind() != TOX_FILE_KIND_DATA) {
             return;
         }
@@ -185,6 +195,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
             Gtk::manage(widget));
     }, *this));
     m_contact->file_manager()->signal_send_file().connect(sigc::track_obj([this](std::shared_ptr<toxmm::file>& file) {
+        utils::log me;
         if (file->property_kind() != TOX_FILE_KIND_DATA) {
             return;
         }
@@ -254,6 +265,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
     //auto scroll
     m_scrolled->get_vadjustment()->signal_value_changed()
             .connect_notify(sigc::track_obj([this]() {
+        utils::log me;
         // check if lowest position
         auto adj = m_scrolled->get_vadjustment();
         m_autoscroll = adj->get_upper() - adj->get_page_size()
@@ -261,6 +273,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
     }, *this));
     m_chat_box->signal_size_allocate()
             .connect_notify(sigc::track_obj([this](Gtk::Allocation&) {
+        utils::log me;
         // auto scroll:
         if (m_autoscroll) {
             auto adj = m_scrolled->get_vadjustment();
@@ -269,6 +282,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
     }, *this));
     m_scrolled->signal_size_allocate()
             .connect_notify(sigc::track_obj([this](Gtk::Allocation&) {
+        utils::log me;
         // auto scroll:
         if (m_autoscroll) {
             auto adj = m_scrolled->get_vadjustment();
@@ -288,6 +302,7 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
                               Gtk::DEST_DEFAULT_MOTION | Gtk::DEST_DEFAULT_DROP,
                               Gdk::ACTION_COPY | Gdk::ACTION_MOVE);
     m_scrolled->signal_drag_data_received().connect(sigc::track_obj([this](const Glib::RefPtr<Gdk::DragContext>&, int, int, const Gtk::SelectionData& data, guint, guint) {
+        utils::log me;
         auto ct = m_contact; //.lock();
         auto fmng = ct->file_manager();
         if (!ct | !fmng) {
@@ -307,10 +322,12 @@ chat::chat(dialog::main& main, std::shared_ptr<toxmm::contact> contact):
 }
 
 chat::~chat() {
+    utils::log me;
     m_main.chat_remove(*m_headerbar_attached, *m_body);
 }
 
 void chat::activated() {
+    utils::log me;
     if (is_visible()) {
         present();
     } else {
@@ -358,6 +375,7 @@ void chat::update_children(GdkEventMotion* event,
 
 Glib::ustring chat::get_children_selection(
     std::vector<Gtk::Widget*> children) {
+    utils::log me;
     Glib::ustring res;
     Glib::ustring tmp;
     for (auto c : children) {
@@ -386,6 +404,7 @@ Glib::ustring chat::get_children_selection(
 }
 
 void chat::load_log() {
+    utils::log me;
     auto c = m_main.tox();
     auto cm = c->contact_manager();
     if (!c || !cm) {
@@ -574,7 +593,7 @@ void chat::add_chat_line(AppendMode append_mode,
                    std::shared_ptr<toxmm::contact> contact,
                    Glib::DateTime time,
                    Gtk::Widget* widget) {
-
+    utils::log me;
     auto side = SIDE::NONE;
     bool append = append_mode == LINE_APPEND_APPENDABLE || append_mode == LINE_APPEND;
     if (append) {
@@ -622,7 +641,7 @@ void chat::add_chat_line(AppendMode append_mode,
                    std::shared_ptr<toxmm::core> contact,
                    Glib::DateTime time,
                    Gtk::Widget* widget) {
-
+    utils::log me;
     auto side = SIDE::NONE;
     bool append = append_mode == LINE_APPEND_APPENDABLE || append_mode == LINE_APPEND;
     if (append) {
@@ -670,6 +689,7 @@ void chat::add_chat_line(AppendMode append_mode,
 void chat::add_log(std::shared_ptr<toxmm::storage> storage,
                    std::shared_ptr<toxmm::contact> contact,
                    std::function<flatbuffers::Offset<flatbuffers::Log::Item>(flatbuffers::FlatBufferBuilder&)> create_func) {
+    utils::log me;
     if (!storage || !contact) {
         return;
     }

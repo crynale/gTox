@@ -26,10 +26,12 @@ using namespace widget;
 imagescaled::imagescaled(BaseObjectType* cobject,
                          utils::builder)
     : Gtk::Image(cobject) {
+    utils::log me;
     show();
 }
 
 imagescaled::~imagescaled() {
+    utils::log me;
 }
 
 bool imagescaled::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {

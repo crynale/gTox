@@ -32,6 +32,7 @@
 #include "gtox.h"
 
 void print_copyright() {
+    utils::log me;
     std::clog
         << "gTox a GTK-based tox-client - https://github.com/KoKuToru/gTox.git"
         << std::endl << std::endl << "Copyright (C) 2014  Luca Béla Palkovics"
@@ -57,11 +58,13 @@ void print_copyright() {
 }
 
 bool translation_working() {
+    utils::log me;
     const char* TRANSLATION_CHECK = "TRANSLATION_CHECKER";
     return !(_(TRANSLATION_CHECK) == TRANSLATION_CHECK);
 }
 
 bool find_translation_domain() {
+    utils::log me;
     // Translation search locations in order of preference
     std::vector<std::string> locations {"./i18n",
         bindtextdomain("gtox", nullptr), // default location
@@ -76,7 +79,25 @@ bool find_translation_domain() {
     return false;
 }
 
+bool change_language(const std::string& lang) {
+    utils::log me;
+    // https://www.gnu.org/software/gettext/manual/html_node/gettext-grok.html
+
+    /* Change language */
+    Glib::setenv("LANGUAGE", lang.c_str(), true);
+
+    /* Make change known. */
+    {
+        extern int _nl_msg_cat_cntr;
+        ++_nl_msg_cat_cntr;
+    }
+
+    // Find the prefered domain for this language
+    return find_translation_domain();
+}
+
 bool setup_translation() {
+    utils::log me;
     // Translations returns in UTF-8
     bind_textdomain_codeset("gtox", "UTF-8");
     textdomain("gtox");
@@ -88,6 +109,7 @@ bool setup_translation() {
 }
 
 void terminate_handler() {
+    utils::log me;
     std::exception_ptr exptr = std::current_exception();
     try {
         std::rethrow_exception(exptr);
@@ -107,6 +129,7 @@ void terminate_handler() {
 }
 
 int main(int argc, char* argv[]) {
+    utils::log me;
     std::set_terminate(terminate_handler);
     Glib::add_exception_handler(sigc::ptr_fun(&terminate_handler));
 

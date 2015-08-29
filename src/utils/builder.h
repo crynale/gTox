@@ -22,6 +22,7 @@
 
 #include <gtkmm.h>
 #include <glibmm.h>
+#include "debug.h"
 
 namespace utils {
     /**
@@ -42,36 +43,50 @@ namespace utils {
                         T* ptr) :
                         m_builder(builder),
                         m_ptr(ptr) {
+                        utils::log me;
                     }
+                    ~ref() {
+                        utils::log me;
+                    }
+
                     T& operator *() {
+                        utils::log me;
                         return *m_ptr;
                     }
                     const T& operator*() const {
+                        utils::log me;
                         return *m_ptr;
                     }
                     T* operator ->() {
+                        utils::log me;
                         return m_ptr;
                     }
                     const T* operator ->() const {
+                        utils::log me;
                         return m_ptr;
                     }
                     T* raw() {
+                        utils::log me;
                         return m_ptr;
                     }
                     const T* raw() const {
+                        utils::log me;
                         return m_ptr;
                     }
-
             };
 
             builder(Glib::RefPtr<Gtk::Builder> builder);
+            ~builder();
+
             Glib::RefPtr<Gtk::Builder> operator->();
             operator Glib::RefPtr<Gtk::Builder>() const {
+                utils::log me;
                 return m_builder;
             }
 
             template <class T_Widget, typename ...  T> inline
             T_Widget* get_widget_derived(const Glib::ustring& name, T&& ... params) {
+                utils::log me;
                 T_Widget* widget = nullptr;
 
                 // Get the widget from the GtkBuilder file.
@@ -103,6 +118,7 @@ namespace utils {
 
             template <class T_Widget>
             T_Widget* get_widget(const Glib::ustring& name) {
+                utils::log me;
                 T_Widget* widget = nullptr;
                 m_builder->get_widget(name, widget);
                 if (!widget) {
@@ -113,6 +129,7 @@ namespace utils {
 
             template <class T_Widget>
             void get_widget(const Glib::ustring& name, T_Widget*& widget) {
+                utils::log me;
                 widget = nullptr;
                 m_builder->get_widget(name, widget);
                 if (!widget) {
@@ -124,6 +141,7 @@ namespace utils {
             ref<T_Widget> create_ref(const Glib::ustring resource,
                               const Glib::ustring& name,
                               T&& ... params) {
+                utils::log me;
                 auto ori_builder = Gtk::Builder::create_from_resource(resource);
                 auto builder = utils::builder(ori_builder);
                 return { builder, builder

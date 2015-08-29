@@ -29,7 +29,7 @@
 using namespace widget;
 
 main_menu::main_menu(dialog::main& main): m_main(main) {
-
+    utils::log me;
     utils::builder builder = Gtk::Builder::create_from_resource("/org/gtox/ui/popover_settings.ui");
 
     builder.get_widget("profile_username_entry", m_profile.username);
@@ -58,11 +58,13 @@ main_menu::main_menu(dialog::main& main): m_main(main) {
 
     builder.get_widget<Gtk::Button>("profile_copy_tox_id")
             ->signal_clicked().connect([this, hexfull]() {
+        utils::log me;
         Gtk::Clipboard::get()->set_text(hexfull);
     });
 
     /* Open settings */
     m_settings_btn->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         hide();
         if (m_settings) {
             m_settings->activated();
@@ -73,6 +75,7 @@ main_menu::main_menu(dialog::main& main): m_main(main) {
 
     /* change avatar logic */
     m_avatar->signal_clicked().connect(sigc::track_obj([this](){
+        utils::log me;
         Gtk::FileChooserDialog dialog(_("Select new avatar"), Gtk::FILE_CHOOSER_ACTION_OPEN);
         dialog.add_button (Gtk::Stock::OPEN,
                                Gtk::RESPONSE_ACCEPT);
@@ -93,7 +96,8 @@ main_menu::main_menu(dialog::main& main): m_main(main) {
         dialog.set_preview_widget(avatar_preview);
         dialog.set_use_preview_label(false);
 
-        dialog.signal_update_preview().connect([&dialog, &avatar_preview](){
+        dialog.signal_update_preview().connect([&dialog, &avatar_preview]() {
+            utils::log me;
             auto uri = dialog.get_preview_uri();
             if (uri.empty()) {
                 avatar_preview.hide();
@@ -115,20 +119,24 @@ main_menu::main_menu(dialog::main& main): m_main(main) {
 
     /* Update name / status message logic */
     m_profile.username->signal_focus_out_event().connect_notify(sigc::hide([this]() {
+        utils::log me;
         m_main.tox()->property_name() = m_profile.username->get_text();
     }));
     m_profile.status  ->signal_focus_out_event().connect_notify(sigc::hide([this]() {
+        utils::log me;
         m_main.tox()->property_status_message() = m_profile.status->get_text();
     }));
 
     /* Add contact submit button handling */
     builder.get_widget<Gtk::Button>("add_contact_submit")
-            ->signal_clicked().connect([this](){
+            ->signal_clicked().connect([this]() {
+        utils::log me;
         add_contact();
     });
 
     /* limit text input for tox-id */
-    m_add_contact.tox_id->signal_changed().connect_notify([this](){
+    m_add_contact.tox_id->signal_changed().connect_notify([this]() {
+        utils::log me;
         Glib::ustring text;
         for (auto letter : m_add_contact.tox_id->get_text()) {
             if ((letter >= '0' && letter <= '9')
@@ -145,6 +153,7 @@ main_menu::~main_menu() {
 }
 
 void main_menu::set_visible(bool visible) {
+    utils::log me;
     Gtk::Popover::set_visible(visible);
 
     // update data
@@ -161,6 +170,7 @@ void main_menu::set_visible(bool visible) {
 
 
 void main_menu::add_contact() {
+    utils::log me;
     Gtk::Window& parent = dynamic_cast<Gtk::Window&>(*this->get_toplevel());
 
     if (m_add_contact.tox_id->get_text().length() != TOX_ADDRESS_SIZE * 2) {

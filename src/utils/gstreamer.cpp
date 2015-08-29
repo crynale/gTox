@@ -20,6 +20,7 @@
 #include <gstreamermm/bus.h>
 #include <glibmm/i18n.h>
 #include <gstreamermm/uridecodebin.h>
+#include "debug.h"
 
 namespace sigc {
     SIGC_FUNCTORS_DEDUCE_RESULT_TYPE_WITH_DECLTYPE
@@ -58,6 +59,7 @@ gstreamer::gstreamer():
     m_property_duration(*this, "gstreamer-duration", 0),
     m_property_volume(*this, "gstreamer-volume", 0.5),
     m_property_pixbuf(*this, "gstreamer-pixbuf") {
+    utils::log me;
 
     m_playbin = Gst::PlayBin::create();
     m_appsink = Gst::AppSink::create();
@@ -134,6 +136,7 @@ gstreamer::gstreamer():
                 sigc::track_obj([this](
                                 const Glib::RefPtr<Gst::Bus>&,
                                 const Glib::RefPtr<Gst::Message>& message) {
+        utils::log me;
         Glib::RefPtr<Gst::MessageError> error;
 
         switch (message->get_message_type()) {
@@ -168,15 +171,18 @@ gstreamer::gstreamer():
                         | Glib::BINDING_SYNC_CREATE);
 
     property_state().signal_changed().connect(sigc::track_obj([this]() {
+        utils::log me;
         m_playbin->set_state(property_state());
     }, *this));
 }
 
 gstreamer::~gstreamer() {
+    utils::log me;
     property_state() = Gst::STATE_NULL;
 }
 
 std::pair<bool, bool> gstreamer::has_video_audio(Glib::ustring uri) {
+    utils::log me;
     //http://gstreamer.freedesktop.org/data/doc/gstreamer/head/manual/html/chapter-metadata.html
     auto pipeline = Gst::Pipeline::create();
     auto decoder  = Gst::UriDecodeBin::create();

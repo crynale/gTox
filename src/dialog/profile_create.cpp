@@ -29,7 +29,7 @@ profile_create::profile_create(BaseObjectType* cobject,
     Gtk::Assistant(cobject),
     m_aborted(true),
     m_path(path) {
-
+    utils::log me;
     property_resizable() = false;
     set_size_request(800, 600);
     set_position(Gtk::WindowPosition::WIN_POS_CENTER_ALWAYS);
@@ -40,6 +40,7 @@ profile_create::profile_create(BaseObjectType* cobject,
 
     auto w = builder.get_widget<Gtk::Widget>("assistant_first_page");
     m_username->signal_changed().connect([this, w]() {
+        utils::log me;
         toxmm::contactAddrPublic addr;
         m_last_toxcore = toxmm::core::create_state(m_username->get_text(), m_status->get_text(), addr);
 
@@ -63,12 +64,14 @@ profile_create::profile_create(BaseObjectType* cobject,
     });
 
     m_status->signal_changed().connect([this, w]() {
+        utils::log me;
         toxmm::contactAddrPublic addr;
         m_last_toxcore = toxmm::core::create_state(m_username->get_text(), m_status->get_text(), addr);
     });
 }
 
 utils::builder::ref<profile_create> profile_create::create(const Glib::ustring& path) {
+    utils::log me;
     return utils::builder::create_ref<profile_create>(
                 "/org/gtox/ui/dialog_assistant.ui",
                 "dialog_assistant",
@@ -76,14 +79,17 @@ utils::builder::ref<profile_create> profile_create::create(const Glib::ustring& 
 }
 
 profile_create::~profile_create() {
+    utils::log me;
 }
 
 void profile_create::on_cancel() {
+    utils::log me;
     m_path.clear();
     hide();
 }
 
 void profile_create::on_apply() {
+    utils::log me;
     auto stream = Gio::File::create_for_path(m_file_tox->get_text())->create_file();
     auto bytes = Glib::Bytes::create((void*)m_last_toxcore.data(), m_last_toxcore.size());
     stream->write_bytes(bytes);
@@ -95,13 +101,15 @@ void profile_create::on_apply() {
 }
 
 void profile_create::on_close() {
-
+    utils::log me;
 }
 
 bool profile_create::is_aborted() {
+    utils::log me;
     return m_aborted;
 }
 
 Glib::ustring profile_create::get_path() {
+    utils::log me;
     return m_path;
 }

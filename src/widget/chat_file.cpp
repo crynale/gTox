@@ -30,6 +30,7 @@ using namespace widget;
 file::file(BaseObjectType* cobject,
            utils::builder builder):
     Gtk::Frame(cobject) {
+    utils::log me;
     builder.get_widget("file_resume", m_file_resume);
     builder.get_widget("file_cancel", m_file_cancel);
     builder.get_widget("file_pause", m_file_pause);
@@ -60,6 +61,7 @@ file::file(BaseObjectType* cobject,
            utils::builder builder,
            const std::shared_ptr<toxmm::file>& file):
     file::file(cobject, builder) {
+    utils::log me;
     m_file = file;
 
     auto binding_flags = Glib::BINDING_DEFAULT | Glib::BINDING_SYNC_CREATE;
@@ -87,6 +89,7 @@ file::file(BaseObjectType* cobject,
 
     //Button handling
     auto proprety_state_update = [this]() {
+        utils::log me;
         auto state = m_file->property_state().get_value();
         bool file_resume = state == TOX_FILE_CONTROL_RESUME;
         bool file_pause  = state == TOX_FILE_CONTROL_PAUSE;
@@ -121,16 +124,19 @@ file::file(BaseObjectType* cobject,
                              binding_flags | Glib::BINDING_INVERT_BOOLEAN));
 
     m_file_resume->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         if (m_file_resume->property_active()) {
             m_file->property_state() = TOX_FILE_CONTROL_RESUME;
         }
     }, *this));
     m_file_pause->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         if (m_file_pause->property_active()) {
             m_file->property_state() = TOX_FILE_CONTROL_PAUSE;
         }
     }, *this));
     m_file_cancel->signal_clicked().connect(sigc::track_obj([this]() {
+        utils::log me;
         if (m_file_cancel->property_active()) {
             m_file->property_state() = TOX_FILE_CONTROL_CANCEL;
         }
@@ -143,6 +149,7 @@ file::file(BaseObjectType* cobject,
 
     //Buttons when file complete
     m_file_dir->signal_clicked().connect([this]() {
+        utils::log me;
         auto filemanager = Gio::AppInfo::get_default_for_type("inode/directory",
                                                               true);
 
@@ -157,6 +164,7 @@ file::file(BaseObjectType* cobject,
         }
     });
     m_file_open->signal_clicked().connect([this]() {
+        utils::log me;
         try {
             Gio::AppInfo::launch_default_for_uri(
                         Glib::filename_to_uri(
@@ -176,6 +184,7 @@ file::file(BaseObjectType* cobject,
 
     //Display control
     m_dispatcher.emit([this, binding_flags]() {
+        utils::log me;
         m_bindings.push_back(Glib::Binding::bind_property(
                                  m_file->property_complete(),
                                  m_revealer_download->property_reveal_child(),
@@ -184,6 +193,7 @@ file::file(BaseObjectType* cobject,
 }
 
 utils::builder::ref<file> file::create(const std::shared_ptr<toxmm::file>& file) {
+    utils::log me;
     return utils::builder::create_ref<widget::file>(
                 "/org/gtox/ui/chat_filerecv.ui",
                 "chat_filerecv",
@@ -191,10 +201,12 @@ utils::builder::ref<file> file::create(const std::shared_ptr<toxmm::file>& file)
 }
 
 utils::builder::ref<file> file::create(const Glib::ustring& file_path) {
+    utils::log me;
     class dummy_file: virtual public Glib::Object, public toxmm::file {
         public:
             dummy_file(const Glib::ustring& file_path):
                 Glib::ObjectBase(typeid(dummy_file)) {
+                utils::log me;
                 m_property_name =
                         Gio::File::create_for_path(file_path)->get_basename();
                 m_property_path = file_path;
@@ -217,6 +229,7 @@ utils::builder::ref<file> file::create(const Glib::ustring& file_path) {
 }
 
 void file::update_complete() {
+    utils::log me;
     m_file_open_bar->hide();
 
     if (m_file->is_recv() && !m_file->property_complete().get_value()) {
@@ -236,6 +249,7 @@ void file::update_complete() {
         m_preview_thread = std::thread([this,
                                        dispatcher = utils::dispatcher::ref(m_dispatcher),
                                        file]() {
+            utils::log me;
             static std::mutex limit_mutex;
             std::lock_guard<std::mutex> lg(limit_mutex);
             //TODO: check file size before generating preview ?
@@ -259,6 +273,7 @@ void file::update_complete() {
                         img = img->scale_simple(int(w), int(h),
                                                 Gdk::InterpType::INTERP_BILINEAR);
                         dispatcher.emit([this, img]() {
+                            utils::log me;
                             m_preview_image->property_pixbuf() = img;
                             m_preview_image_revealer->property_reveal_child() = true;
                             m_spinner->property_visible() = false;
@@ -271,6 +286,7 @@ void file::update_complete() {
                       animated images..
                     */
                     dispatcher.emit([this]() {
+                        utils::log me;
                         m_spinner->property_visible() = false;
                     });
                 }
@@ -281,6 +297,7 @@ void file::update_complete() {
                                                  ::has_video_audio(file->get_uri());
                 if (has_video || has_audio) {
                     dispatcher.emit([this, file]() {
+                        utils::log me;
                         m_preview_video->property_uri() = file->get_uri();
                         //TODO: reveal and stop spinner after
                         //peview image got generated !
@@ -296,6 +313,7 @@ void file::update_complete() {
     auto update_file = [this](const Glib::RefPtr<Gio::File>&,
                        const Glib::RefPtr<Gio::File>&,
                        Gio::FileMonitorEvent event_type) {
+        utils::log me;
         switch (event_type) {
             case Gio::FILE_MONITOR_EVENT_DELETED:
             case Gio::FILE_MONITOR_EVENT_MOVED :
