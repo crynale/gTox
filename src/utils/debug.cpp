@@ -21,8 +21,12 @@
 #include <mutex>
 #include <iostream>
 #include <iomanip>
+#ifndef NO_UNWIND
 #define UNW_LOCAL_ONLY
 #include <libunwind.h>
+#else
+#define unw_word_t int
+#endif
 #include <unistd.h>
 #include <stdio.h>
 #include <glibmm.h>
@@ -45,6 +49,7 @@ void display() {
 }
 
 bool caller_symbol(std::string& out_symbol, unw_word_t& out_pc, unw_word_t& out_offset) {
+#ifndef NO_UNWIND
     unw_cursor_t cursor;
     unw_context_t context;
 
@@ -76,7 +81,7 @@ bool caller_symbol(std::string& out_symbol, unw_word_t& out_pc, unw_word_t& out_
     free(demangled);
 
     unw_get_reg(&cursor, UNW_REG_IP, &out_pc);
-
+#endif
     return true;
 }
 
@@ -145,7 +150,7 @@ thread_local unsigned depth = 0;
 static std::mutex log_mtx;
 
 log::log() {
-    static bool enable_log = Glib::getenv("GTOX_DEBUG") == "1";
+    static bool enable_log = Glib::getenv("GTOX_LOG") == "1";
     if (!enable_log) {
         return;
     }
@@ -163,7 +168,7 @@ log::log() {
 }
 
 log::~log() {
-    static bool enable_log = Glib::getenv("GTOX_DEBUG") == "1";
+    static bool enable_log = Glib::getenv("GTOX_LOG") == "1";
     if (!enable_log) {
         return;
     }
